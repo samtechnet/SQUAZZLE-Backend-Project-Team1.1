@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 import bodyParser, { json } from "body-parser";
 import cors from "cors";
 import AppError from "./services/errorHandlers/errors";
+import { client } from './services/database/database';
+import { errorController } from "./middleware/errrorController";
 
 dotenv.config();
 
@@ -20,7 +22,20 @@ app.all('*', (req: Request, res: Response, next: NextFunction) => {
     
 });
 
-
+app.use(errorController);
 app.listen(PORT, async () => {
-    console.log(`Server started on port ${PORT}`);
+   async function run() {
+        try {
+            await client.connect();
+            const connection = await client.db("admin").command({ ping: 1 })
+            console.log(connection)
+            console.log(`Server started successfulyy on PORT https://localhost:${PORT}`);
+        }
+         finally {
+            await client.close();
+        }
+    }
+
+    run().catch(console.dir);
+   // console.log(`Server started on port ${PORT}`);
 });

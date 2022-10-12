@@ -17,15 +17,13 @@ var __extends = (this && this.__extends) || (function () {
 exports.__esModule = true;
 var AppError = /** @class */ (function (_super) {
     __extends(AppError, _super);
-    //name: void;
-    //stack: string;
     function AppError(message, statusCode) {
         var _this = _super.call(this, message) || this;
         _this.statusCode = statusCode;
         _this.isOperational = true;
         _this.status = "".concat(statusCode).startsWith('4') ? 'fail' : 'error';
         //this.name = name;
-        //this.stack=this.stack
+        _this.stack = _this.stack;
         Error.captureStackTrace(_this, _this.constructor);
         return _this;
     }
