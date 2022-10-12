@@ -7,8 +7,8 @@ exports.uri = exports.client = void 0;
 var _a = require('mongodb'), MongoClient = _a.MongoClient, ServerApiVersion = _a.ServerApiVersion;
 var dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1["default"].config();
-var ENV = process.env.ENV;
-var uri = "mongodb+srv://sqatting:Sqatting123.@gallery-one-app.h2qyv.mongodb.net/?retryWrites=true&w=majority";
+var _b = process.env, ENV = _b.ENV, password = _b.password, name = _b.name;
+var uri = "mongodb+srv://".concat(name, ":").concat(password, "@gallery-one-app.h2qyv.mongodb.net/?retryWrites=true&w=majority");
 exports.uri = uri;
 var connectParams = {
     useNewUrlParser: true,

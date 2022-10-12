@@ -6,10 +6,12 @@ import connectionParams from "./connection";
 dotenv.config();
 
 const {
-  ENV
+    ENV,
+    password,
+    name
 } = process.env;
 
-const uri = "mongodb+srv://sqatting:Sqatting123.@gallery-one-app.h2qyv.mongodb.net/?retryWrites=true&w=majority";
+const uri = `mongodb+srv://${name}:${password}@gallery-one-app.h2qyv.mongodb.net/?retryWrites=true&w=majority`;
 const connectParams = {
     useNewUrlParser: true,
     useUnifiedTopology: true
