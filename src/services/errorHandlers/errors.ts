@@ -9,7 +9,7 @@ class AppError extends Error {
         this.statusCode = statusCode;
         this.isOperational = true;
          this.status = `${statusCode}`.startsWith('4')? 'fail': 'error';
-        //this.name = name;
+        this.name = this.name;
         this.stack=this.stack
 
 

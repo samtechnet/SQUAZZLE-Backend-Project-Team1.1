@@ -39,65 +39,46 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 exports.__esModule = true;
-var express_1 = __importDefault(require("express"));
+var nodemailer_1 = __importDefault(require("nodemailer"));
 var dotenv_1 = __importDefault(require("dotenv"));
-var body_parser_1 = __importDefault(require("body-parser"));
-var cors_1 = __importDefault(require("cors"));
-var errors_1 = __importDefault(require("./services/errorHandlers/errors"));
-var database_1 = require("./services/database/database");
-var errrorController_1 = require("./middleware/errrorController");
-var userRoutes_1 = require("./routes/userRoutes");
+//import smtpTransport from "../lib/smtp-transport"
 dotenv_1["default"].config();
-var PORT = process.env.PORT || 5000;
-var app = (0, express_1["default"])();
-app.use(body_parser_1["default"].json());
-app.use((0, cors_1["default"])());
-app.use(express_1["default"].json());
-//routes
-(0, userRoutes_1.user_routes)(app);
-app.get("/galleryone", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    return __generator(this, function (_a) {
-        res.json({
-            success: true,
-            message: "welcome to gallery-one api, our sweat documentation is on this url endpoint : https://gallery-one-app.herokuapp.com/ ",
-            note: "should you need any assistance kindly contact our surport on 08161228946"
-        });
-        return [2 /*return*/];
-    });
-}); });
-app.all('*', function (req, res, next) {
-    throw new errors_1["default"]("Requested URL ".concat(req.path, " not found!"), 404);
-});
-app.use(errrorController_1.errorController);
-exports["default"] = app;
-app.listen(PORT, function () { return __awaiter(void 0, void 0, void 0, function () {
-    function run() {
-        return __awaiter(this, void 0, void 0, function () {
-            var connection;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        _a.trys.push([0, , 3, 5]);
-                        return [4 /*yield*/, database_1.client.connect()];
-                    case 1:
-                        _a.sent();
-                        return [4 /*yield*/, database_1.client.db("admin").command({ ping: 1 })];
-                    case 2:
-                        connection = _a.sent();
-                        console.log(connection);
-                        console.log("Server started successfulyy on PORT https://localhost:".concat(PORT));
-                        return [3 /*break*/, 5];
-                    case 3: return [4 /*yield*/, database_1.client.close()];
-                    case 4:
-                        _a.sent();
-                        return [7 /*endfinally*/];
-                    case 5: return [2 /*return*/];
-                }
+var _a = process.env, GMAIL_HOST = _a.GMAIL_HOST, GMAIL_PORT = _a.GMAIL_PORT, GMAIL_USESSL = _a.GMAIL_USESSL, GMAIL_USERNAME = _a.GMAIL_USERNAME, GMAIL_PASSWORD = _a.GMAIL_PASSWORD, FROM = _a.FROM;
+function main(emails, firstName, lastName, code, subject) {
+    return __awaiter(this, void 0, void 0, function () {
+        var transporter, output, mailOptions;
+        return __generator(this, function (_a) {
+            transporter = nodemailer_1["default"].createTransport({
+                host: GMAIL_HOST,
+                port: 465,
+                secure: true,
+                auth: {
+                    user: GMAIL_USERNAME,
+                    pass: GMAIL_PASSWORD
+                },
+                tls: { rejectUnauthorized: false }
             });
+            output = "\n    <p>Welcome to Squazzle ".concat(firstName + " " + lastName, "</p>\n    <h3>Message</h3>\n    <p>To activate your account use this code ").concat(code, " \n    \n    ");
+            mailOptions = {
+                from: '"Squazzle Team" <info@creditalert.com.ng>',
+                to: "".concat(emails),
+                subject: "".concat(subject),
+                text: "Hello ".concat(firstName),
+                html: output
+            };
+            transporter.sendMail(mailOptions, function (error, info) {
+                if (error) {
+                    return console.log(error);
+                }
+                console.log('Message sent: %s', info.messageId);
+                console.log('preview URL: %s', nodemailer_1["default"].getTestMessageUrl(info));
+            });
+            return [2 /*return*/];
         });
-    }
-    return __generator(this, function (_a) {
-        run()["catch"](console.dir);
-        return [2 /*return*/];
     });
-}); });
+}
+;
+var welcomeSender = function (recipient, name, code) {
+};
+//require('crypto').randomBytes(64).toString('hex')
+exports["default"] = main;

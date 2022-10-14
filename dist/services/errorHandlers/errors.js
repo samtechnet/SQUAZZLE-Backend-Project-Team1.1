@@ -22,7 +22,7 @@ var AppError = /** @class */ (function (_super) {
         _this.statusCode = statusCode;
         _this.isOperational = true;
         _this.status = "".concat(statusCode).startsWith('4') ? 'fail' : 'error';
-        //this.name = name;
+        _this.name = _this.name;
         _this.stack = _this.stack;
         Error.captureStackTrace(_this, _this.constructor);
         return _this;
