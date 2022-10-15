@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.validateEmail = exports.registerValidation = void 0;
+exports.isActive = exports.validateEmail = exports.isCodeactive = exports.loginschema = exports.registerValidation = void 0;
 var express_validator_1 = require("express-validator");
 var database_1 = require("../../services/database/database");
 var database = database_1.client.db("squazzledb");
@@ -46,6 +46,15 @@ var schema = [
     (0, express_validator_1.body)('password').isLength({ min: 6 }).withMessage('Password must be at least 6 character long')
 ];
 exports.registerValidation = schema;
+var loginschema = [
+    (0, express_validator_1.body)('email').isEmail().withMessage('email must contain a valid email addres'),
+    (0, express_validator_1.body)('password').isLength({ min: 6 }).withMessage('Password must be at least 6 character long')
+];
+exports.loginschema = loginschema;
+var isCodeactive = [
+    (0, express_validator_1.body)('code').isLength({ min: 6 }).isNumeric().withMessage('code must be at least 6 character long')
+];
+exports.isCodeactive = isCodeactive;
 var validateEmail = function (email) { return __awaiter(void 0, void 0, void 0, function () {
     var user, error_1;
     return __generator(this, function (_a) {
@@ -74,3 +83,31 @@ var validateEmail = function (email) { return __awaiter(void 0, void 0, void 0, 
     });
 }); };
 exports.validateEmail = validateEmail;
+var isActive = function (email) { return __awaiter(void 0, void 0, void 0, function () {
+    var user, error_2;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 3, , 4]);
+                return [4 /*yield*/, database_1.client.connect()];
+            case 1:
+                _a.sent();
+                return [4 /*yield*/, Users.findOne({ email: email })];
+            case 2:
+                user = _a.sent();
+                console.log(user.isEmailVerified);
+                if (user.isEmailVerified == "false") {
+                    return [2 /*return*/, false];
+                }
+                else {
+                    return [2 /*return*/, true];
+                }
+                return [3 /*break*/, 4];
+            case 3:
+                error_2 = _a.sent();
+                return [3 /*break*/, 4];
+            case 4: return [2 /*return*/];
+        }
+    });
+}); };
+exports.isActive = isActive;

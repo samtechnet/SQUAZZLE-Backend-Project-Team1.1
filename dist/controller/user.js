@@ -39,13 +39,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 exports.__esModule = true;
-exports.test = exports.signIn = exports.signUp = void 0;
+exports.activateAccount = exports.test = exports.signIn = exports.signUp = void 0;
 var user_1 = __importDefault(require("../model/user"));
 var database_1 = require("../services/database/database");
 var validation_1 = require("./auth/validation");
 var crypto_1 = __importDefault(require("crypto"));
 var dotenv_1 = __importDefault(require("dotenv"));
-var senders_1 = __importDefault(require("../mailers/senders"));
+var senders_1 = require("../mailers/senders");
 var errors_1 = __importDefault(require("../services/errorHandlers/errors"));
 dotenv_1["default"].config();
 var database = database_1.client.db("squazzledb");
@@ -112,7 +112,7 @@ var signUp = function (req, res) { return __awaiter(void 0, void 0, void 0, func
                         })];
                 }
                 if (reg) {
-                    (0, senders_1["default"])(newUser.email, newUser.firstName, newUser.lastName, newUser.verificationCode, subject)["catch"](console.error);
+                    (0, senders_1.main)(newUser.email, newUser.firstName, newUser.lastName, newUser.verificationCode, subject)["catch"](console.error);
                     return [2 /*return*/, res.status(200).json({
                             success: true,
                             message: "Account successfully created, Check your mail for activation code"
@@ -134,31 +134,102 @@ var signUp = function (req, res) { return __awaiter(void 0, void 0, void 0, func
 }); };
 exports.signUp = signUp;
 var signIn = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var error_2;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
+    var _a, email, password, usercheck, error_2;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
             case 0:
-                _a.trys.push([0, 1, 2, 4]);
-                console.log(req);
+                _a = req.body, email = _a.email, password = _a.password;
+                _b.label = 1;
+            case 1:
+                _b.trys.push([1, 3, 4, 6]);
+                validation_1.loginschema;
+                return [4 /*yield*/, (0, validation_1.isActive)(email)
+                    // console.log(isActive(email))
+                ];
+            case 2:
+                usercheck = _b.sent();
+                // console.log(isActive(email))
+                if (usercheck) {
+                    return [2 /*return*/, res.status(200).json({
+                            success: false,
+                            error: "User account is not active, Kindly activate account"
+                        })];
+                }
+                ;
                 res.status(200).json({
                     success: true,
                     message: "Account successfully created, Check your mail for activation code"
                 });
-                return [3 /*break*/, 4];
-            case 1:
-                error_2 = _a.sent();
-                return [2 /*return*/, next(new errors_1["default"]("something went wrong here is the error ".concat(error_2), 500))];
-            case 2: return [4 /*yield*/, database_1.client.close()];
+                return [3 /*break*/, 6];
             case 3:
-                _a.sent();
+                error_2 = _b.sent();
+                return [2 /*return*/, next(new errors_1["default"]("something went wrong here is the error ".concat(error_2), 500))];
+            case 4: return [4 /*yield*/, database_1.client.close()];
+            case 5:
+                _b.sent();
                 return [7 /*endfinally*/];
-            case 4:
+            case 6:
                 ;
                 return [2 /*return*/];
         }
     });
 }); };
 exports.signIn = signIn;
+var activateAccount = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    var code, user, modify, error_3;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                code = req.body.code;
+                _a.label = 1;
+            case 1:
+                _a.trys.push([1, 5, 6, 8]);
+                return [4 /*yield*/, database_1.client.connect()];
+            case 2:
+                _a.sent();
+                //console.log(typeof code)
+                validation_1.isCodeactive;
+                return [4 /*yield*/, Users.findOne({ verificationCode: Number(code) })
+                    //console.log(user)
+                ];
+            case 3:
+                user = _a.sent();
+                //console.log(user)
+                if (!user) {
+                    return [2 /*return*/, res.status(401).json({
+                            message: "Invalid code",
+                            success: false
+                        })];
+                }
+                else if (user.isEmailVerified) {
+                    return [2 /*return*/, res.status(404).json({
+                            message: "Email already verified",
+                            success: false
+                        })];
+                }
+                return [4 /*yield*/, Users.findOneAndUpdate({ verificationCode: user.verificationCode }, { $set: { isEmailVerified: true } })];
+            case 4:
+                modify = _a.sent();
+                //console.log(modify)
+                (0, senders_1.welcomeSender)(user);
+                return [2 /*return*/, res.status(201).json({
+                        message: "Email verification success",
+                        success: true
+                    })];
+            case 5:
+                error_3 = _a.sent();
+                return [2 /*return*/, next(new errors_1["default"]("something went wrong here is the error ".concat(error_3), 500))];
+            case 6: return [4 /*yield*/, database_1.client.close()];
+            case 7:
+                _a.sent();
+                return [7 /*endfinally*/];
+            case 8:
+                ;
+                return [2 /*return*/];
+        }
+    });
+}); };
+exports.activateAccount = activateAccount;
 var test = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
         res.send("ök");

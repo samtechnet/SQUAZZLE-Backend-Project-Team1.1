@@ -39,25 +39,26 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 exports.__esModule = true;
+exports.welcomeSender = exports.main = void 0;
 var nodemailer_1 = __importDefault(require("nodemailer"));
 var dotenv_1 = __importDefault(require("dotenv"));
 //import smtpTransport from "../lib/smtp-transport"
 dotenv_1["default"].config();
 var _a = process.env, GMAIL_HOST = _a.GMAIL_HOST, GMAIL_PORT = _a.GMAIL_PORT, GMAIL_USESSL = _a.GMAIL_USESSL, GMAIL_USERNAME = _a.GMAIL_USERNAME, GMAIL_PASSWORD = _a.GMAIL_PASSWORD, FROM = _a.FROM;
+var transporter = nodemailer_1["default"].createTransport({
+    host: GMAIL_HOST,
+    port: 465,
+    secure: true,
+    auth: {
+        user: GMAIL_USERNAME,
+        pass: GMAIL_PASSWORD
+    },
+    tls: { rejectUnauthorized: false }
+});
 function main(emails, firstName, lastName, code, subject) {
     return __awaiter(this, void 0, void 0, function () {
-        var transporter, output, mailOptions;
+        var output, mailOptions;
         return __generator(this, function (_a) {
-            transporter = nodemailer_1["default"].createTransport({
-                host: GMAIL_HOST,
-                port: 465,
-                secure: true,
-                auth: {
-                    user: GMAIL_USERNAME,
-                    pass: GMAIL_PASSWORD
-                },
-                tls: { rejectUnauthorized: false }
-            });
             output = "\n    <p>Welcome to Squazzle ".concat(firstName + " " + lastName, "</p>\n    <h3>Message</h3>\n    <p>To activate your account use this code ").concat(code, " \n    \n    ");
             mailOptions = {
                 from: '"Squazzle Team" <info@creditalert.com.ng>',
@@ -77,8 +78,23 @@ function main(emails, firstName, lastName, code, subject) {
         });
     });
 }
+exports.main = main;
 ;
-var welcomeSender = function (recipient, name, code) {
+var welcomeSender = function (user) {
+    var output = "\n    <p>Welcome to Squazzle ".concat(user.firstName + " " + user.lastName, "</p>\n    <h3>Message</h3>\n    <p>Welcome to Squazzle , your account have been activated\n    ");
+    var mailOptions = {
+        from: '"Squazzle Team" <info@creditalert.com.ng>',
+        to: "".concat(user.emails),
+        subject: "Welcome to Squazzle",
+        text: "Hello ".concat(user.firstName),
+        html: output
+    };
+    transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+            return console.log(error);
+        }
+        console.log('Message sent: %s', info.messageId);
+        console.log('preview URL: %s', nodemailer_1["default"].getTestMessageUrl(info));
+    });
 };
-//require('crypto').randomBytes(64).toString('hex')
-exports["default"] = main;
+exports.welcomeSender = welcomeSender;

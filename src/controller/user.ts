@@ -4,10 +4,10 @@ import User from "../model/user";
 import express, { NextFunction, Request, Response } from "express";
 import { client } from "../services/database/database";
 import { body, validationResult } from 'express-validator';
-import { registerValidation, validateEmail } from "./auth/validation";
+import { registerValidation, validateEmail, isActive , loginschema, isCodeactive} from "./auth/validation";
 import crypto from "crypto";
 import dotenv from "dotenv";
-import main from "../mailers/senders";
+import {main, welcomeSender } from "../mailers/senders";
 import AppError from "../services/errorHandlers/errors";
 
 dotenv.config();
@@ -85,8 +85,18 @@ const signUp = async (req: Request, res: Response) => {
     
 }
 const signIn = async (req: Request, res: Response, next: NextFunction) => { 
+    const {email, password}=req.body
     try {
-        console.log(req)
+
+        loginschema;
+        const usercheck=await isActive(email)
+       // console.log(isActive(email))
+        if (usercheck) {
+            return res.status(200).json({
+                success: false,
+                error: "User account is not active, Kindly activate account"
+           })
+        };
          res.status(200).json({
             success: true,
             message: "Account successfully created, Check your mail for activation code",
@@ -97,9 +107,41 @@ const signIn = async (req: Request, res: Response, next: NextFunction) => {
         await client.close();
     };
 };
+const activateAccount= async (req: Request, res: Response, next:NextFunction) => {
+        const { code}=req.body
+    try {
+        await client.connect();
+        //console.log(typeof code)
+        isCodeactive;
+        const user = await Users.findOne({ verificationCode: Number(code) })
+        //console.log(user)
+        if (!user) {
+            return res.status(401).json({
+                message: "Invalid code",
+                success: false,
+            })
+        }else if (user.isEmailVerified) {
+            return res.status(404).json({
+              message: "Email already verified",
+              success: false,
+            });
+        }
+        const modify = await Users.findOneAndUpdate({ verificationCode: user.verificationCode }, { $set: { isEmailVerified: true } });
+        //console.log(modify)
+        welcomeSender(user);
+        return res.status(201).json({
+          message: "Email verification success",
+          success: true,
+        });
 
+    } catch (error) {
+        return next(new AppError(`something went wrong here is the error ${error}`, 500));
+    } finally {
+        await client.close();
+    };
+};
 const test = async (req: Request, res: Response) => {
     res.send("ök")
 };
 
-export { signUp,signIn, test };
+export { signUp,signIn, test, activateAccount };
