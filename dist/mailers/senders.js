@@ -39,12 +39,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 exports.__esModule = true;
-exports.welcomeSender = exports.main = void 0;
+exports.loginWelcomeSender = exports.welcomeSender = exports.main = void 0;
 var nodemailer_1 = __importDefault(require("nodemailer"));
 var dotenv_1 = __importDefault(require("dotenv"));
 //import smtpTransport from "../lib/smtp-transport"
 dotenv_1["default"].config();
 var _a = process.env, GMAIL_HOST = _a.GMAIL_HOST, GMAIL_PORT = _a.GMAIL_PORT, GMAIL_USESSL = _a.GMAIL_USESSL, GMAIL_USERNAME = _a.GMAIL_USERNAME, GMAIL_PASSWORD = _a.GMAIL_PASSWORD, FROM = _a.FROM;
+var date = new Date();
+function newDate() {
+    var currentdate = new Date();
+    var datetime = "Last Sync: " + currentdate.getDate() + "/"
+        + (currentdate.getMonth() + 1) + "/"
+        + currentdate.getFullYear() + " @ "
+        + currentdate.getHours() + ":"
+        + currentdate.getMinutes() + ":"
+        + currentdate.getSeconds();
+    return datetime;
+}
 var transporter = nodemailer_1["default"].createTransport({
     host: GMAIL_HOST,
     port: 465,
@@ -82,9 +93,10 @@ exports.main = main;
 ;
 var welcomeSender = function (user) {
     var output = "\n    <p>Welcome to Squazzle ".concat(user.firstName + " " + user.lastName, "</p>\n    <h3>Message</h3>\n    <p>Welcome to Squazzle , your account have been activated\n    ");
+    console.log(user.email);
     var mailOptions = {
         from: '"Squazzle Team" <info@creditalert.com.ng>',
-        to: "".concat(user.emails),
+        to: "".concat(user.email),
         subject: "Welcome to Squazzle",
         text: "Hello ".concat(user.firstName),
         html: output
@@ -98,3 +110,22 @@ var welcomeSender = function (user) {
     });
 };
 exports.welcomeSender = welcomeSender;
+var loginWelcomeSender = function (user) {
+    var output = "\n    <p>Welcome to Squazzle ".concat(user.firstName + " " + user.lastName, "</p>\n    <h3>Message</h3>\n    <p>Welcome to Squazzle, we notice you just login your account at time: ").concat(newDate(), "</p> \n    <p>if you didn't initiate this login , pls change your password now. someone may be trying to gain access to your account</p>\n    ");
+    console.log(user.email);
+    var mailOptions = {
+        from: '"Squazzle Team" <info@creditalert.com.ng>',
+        to: "".concat(user.email),
+        subject: "Login Notification",
+        text: "Hello ".concat(user.firstName, ", Login Notice"),
+        html: output
+    };
+    transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+            return console.log(error);
+        }
+        console.log('Message sent: %s', info.messageId);
+        console.log('preview URL: %s', nodemailer_1["default"].getTestMessageUrl(info));
+    });
+};
+exports.loginWelcomeSender = loginWelcomeSender;

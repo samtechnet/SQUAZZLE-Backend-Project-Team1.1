@@ -35,12 +35,87 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 exports.__esModule = true;
-exports.isActive = exports.validateEmail = exports.isCodeactive = exports.loginschema = exports.registerValidation = void 0;
+exports.validatePhonenumber = exports.signUpValidationRules = exports.validate = exports.validationRules = exports.generateAccessToken = exports.isActive = exports.validateEmail = exports.isCodeactive = exports.loginschema = exports.registerValidation = void 0;
 var express_validator_1 = require("express-validator");
 var database_1 = require("../../services/database/database");
+var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 var database = database_1.client.db("squazzledb");
 var Users = database.collection("user");
+var validationRules = function () {
+    return [
+        (0, express_validator_1.check)("email")
+            .trim().isEmail().normalizeEmail().withMessage('please enter a valid email'),
+        // check("name")
+        // .trim()
+        // .notEmpty().withMessage('name can not be empty')
+        // .isLength({ min: 1, max: 20})
+        // .withMessage
+        // ("Name  must be between 1 and 20 characters"),
+        (0, express_validator_1.check)("password")
+            .trim()
+            .notEmpty().withMessage('Password can not be empty')
+            .isLength({ min: 6, max: 16 })
+            .withMessage("Password must be between 6 and 16 characters")
+    ];
+};
+exports.validationRules = validationRules;
+var signUpValidationRules = function () {
+    return [
+        (0, express_validator_1.check)("email")
+            .trim().isEmail().normalizeEmail().withMessage('please enter a valid email'),
+        (0, express_validator_1.check)("firstName")
+            .trim()
+            .notEmpty().withMessage('first name can not be empty')
+            .isLength({ min: 1, max: 20 })
+            .withMessage("First name  must be between 1 and 20 characters"),
+        (0, express_validator_1.check)("lastName")
+            .trim()
+            .notEmpty().withMessage('last name can not be empty')
+            .isLength({ min: 1, max: 20 })
+            .withMessage("Last name  must be between 1 and 20 characters"),
+        (0, express_validator_1.check)("password")
+            .trim()
+            .notEmpty().withMessage('Password can not be empty')
+            .isLength({ min: 6, max: 16 })
+            .withMessage("Password must be between 6 and 16 characters"),
+        (0, express_validator_1.check)("phoneNumber")
+            .trim()
+            .notEmpty().withMessage('Phone number can not be empty')
+            .isLength({ min: 11, max: 11 })
+            .withMessage("Phone number must be 11 digit long")
+    ];
+};
+exports.signUpValidationRules = signUpValidationRules;
+var validate = function (req, res, next) {
+    var errors = (0, express_validator_1.validationResult)(req);
+    if (errors.isEmpty()) {
+        return next();
+    }
+    ;
+    var resultErrors = [];
+    errors.array().map(function (err) {
+        var _a;
+        return resultErrors.push((_a = {}, _a[err.param] = err.msg, _a));
+    });
+    resultErrors.push({ message: "Action unsuccessful" });
+    resultErrors.push({ success: false });
+    var errorObject = Object.assign.apply(Object, __spreadArray([{}], resultErrors, false));
+    return res.status(422).json(errorObject);
+};
+exports.validate = validate;
 var schema = [
     (0, express_validator_1.body)('email').isEmail().withMessage('email must contain a valid email addres'),
     (0, express_validator_1.body)('password').isLength({ min: 6 }).withMessage('Password must be at least 6 character long')
@@ -83,8 +158,36 @@ var validateEmail = function (email) { return __awaiter(void 0, void 0, void 0, 
     });
 }); };
 exports.validateEmail = validateEmail;
-var isActive = function (email) { return __awaiter(void 0, void 0, void 0, function () {
+var validatePhonenumber = function (phoneNumber) { return __awaiter(void 0, void 0, void 0, function () {
     var user, error_2;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 3, , 4]);
+                return [4 /*yield*/, database_1.client.connect()];
+            case 1:
+                _a.sent();
+                return [4 /*yield*/, Users.findOne({ phoneNumber: phoneNumber })];
+            case 2:
+                user = _a.sent();
+                console.log(user);
+                if (user) {
+                    return [2 /*return*/, true];
+                }
+                else {
+                    return [2 /*return*/, false];
+                }
+                return [3 /*break*/, 4];
+            case 3:
+                error_2 = _a.sent();
+                return [3 /*break*/, 4];
+            case 4: return [2 /*return*/];
+        }
+    });
+}); };
+exports.validatePhonenumber = validatePhonenumber;
+var isActive = function (email) { return __awaiter(void 0, void 0, void 0, function () {
+    var user, error_3;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -95,8 +198,8 @@ var isActive = function (email) { return __awaiter(void 0, void 0, void 0, funct
                 return [4 /*yield*/, Users.findOne({ email: email })];
             case 2:
                 user = _a.sent();
-                console.log(user.isEmailVerified);
-                if (user.isEmailVerified == "false") {
+                console.log(user.isEmailVerified + "  from isActive");
+                if (user.isEmailVerified === "false") {
                     return [2 /*return*/, false];
                 }
                 else {
@@ -104,10 +207,21 @@ var isActive = function (email) { return __awaiter(void 0, void 0, void 0, funct
                 }
                 return [3 /*break*/, 4];
             case 3:
-                error_2 = _a.sent();
+                error_3 = _a.sent();
                 return [3 /*break*/, 4];
             case 4: return [2 /*return*/];
         }
     });
 }); };
 exports.isActive = isActive;
+var jwsToken = String(process.env.AccessToken);
+function generateAccessToken(user) {
+    var data = {
+        user_id: user._id,
+        role: user.role,
+        email: user.email,
+        name: (user === null || user === void 0 ? void 0 : user.firstName) + " " + (user === null || user === void 0 ? void 0 : user.lastName)
+    };
+    return jsonwebtoken_1["default"].sign(data, jwsToken, { expiresIn: '1800s' });
+}
+exports.generateAccessToken = generateAccessToken;
