@@ -112,7 +112,7 @@ var welcomeSender = function (user) {
 exports.welcomeSender = welcomeSender;
 var loginWelcomeSender = function (user) {
     var output = "\n    <p>Welcome to Squazzle ".concat(user.firstName + " " + user.lastName, "</p>\n    <h3>Message</h3>\n    <p>Welcome to Squazzle, we notice you just login your account at time: ").concat(newDate(), "</p> \n    <p>if you didn't initiate this login , pls change your password now. someone may be trying to gain access to your account</p>\n    ");
-    console.log(user.email);
+    //console.log(user.email)
     var mailOptions = {
         from: '"Squazzle Team" <info@creditalert.com.ng>',
         to: "".concat(user.email),

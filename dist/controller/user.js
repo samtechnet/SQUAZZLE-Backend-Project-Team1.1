@@ -50,7 +50,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 exports.__esModule = true;
-exports.activateAccount = exports.test = exports.signIn = exports.signUp = void 0;
+exports.geAllUsers = exports.activateAccount = exports.test = exports.signIn = exports.signUp = void 0;
 var user_1 = __importDefault(require("../model/user"));
 var database_1 = require("../services/database/database");
 var validation_1 = require("./auth/validation");
@@ -173,8 +173,9 @@ var signIn = function (req, res, next) { return __awaiter(void 0, void 0, void 0
             case 3:
                 usercheck = _b.apply(void 0, [_c.sent()]);
                 str = usercheck.toString();
+                console.log(str);
                 if (str === "false") {
-                    return [2 /*return*/, res.status(200).json({
+                    return [2 /*return*/, res.status(422).json({
                             success: false,
                             error: "User account is not active, Kindly activate account"
                         })];
@@ -193,13 +194,21 @@ var signIn = function (req, res, next) { return __awaiter(void 0, void 0, void 0
                     };
                     result = {
                         user: profile,
-                        token: token,
+                        //token: token,
                         expiresIn: 1800
                     };
-                    (0, senders_1.loginWelcomeSender)(user_2);
-                    return [2 /*return*/, res.status(200).json(__assign(__assign({}, result), { message: "Login success", success: true }))];
+                    //loginWelcomeSender(user);
+                    // console.log(headers)
+                    // res.setHeader('Content-Type', 'application/json');
+                    res.setHeader('Set-Cookie', token);
+                    res.cookie("token", token, { expires: new Date(Date.now() + 1800) });
+                    //console.log(req.cookies.token )
+                    res.send(__assign(__assign({}, result), { message: "Login success", success: true }));
+                    // Calling response.writeHead method
+                    //res.writeHead(200,{'Content-Type': 'application/json'});
                 }
                 else {
+                    console.log("i reach here");
                     return [2 /*return*/, res.status(403).json({
                             message: "Failed login attempt",
                             email: "Incorrect password",
@@ -277,6 +286,45 @@ var activateAccount = function (req, res, next) { return __awaiter(void 0, void 
     });
 }); };
 exports.activateAccount = activateAccount;
+var geAllUsers = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    var allUsers, error_4;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 3, 4, 6]);
+                return [4 /*yield*/, database_1.client.connect()];
+            case 1:
+                _a.sent();
+                return [4 /*yield*/, Users.find({}).toArray()];
+            case 2:
+                allUsers = _a.sent();
+                if (!allUsers) {
+                    return [2 /*return*/, res.status(402).json({
+                            success: false,
+                            error: "No user found"
+                        }).statusCode];
+                }
+                else {
+                    return [2 /*return*/, res.json({
+                            success: true,
+                            data: allUsers
+                        }).statusCode];
+                }
+                return [3 /*break*/, 6];
+            case 3:
+                error_4 = _a.sent();
+                return [2 /*return*/, next(new errors_1["default"]("something went wrong here is the error ".concat(error_4), 500))];
+            case 4: return [4 /*yield*/, database_1.client.close()];
+            case 5:
+                _a.sent();
+                return [7 /*endfinally*/];
+            case 6:
+                ;
+                return [2 /*return*/];
+        }
+    });
+}); };
+exports.geAllUsers = geAllUsers;
 var test = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
         res.send("ök");

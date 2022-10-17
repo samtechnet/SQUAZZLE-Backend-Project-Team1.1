@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import Jwt from "jsonwebtoken";
 import User from "../model/user";
-import express, { NextFunction, Request, Response } from "express";
+import express, { application, NextFunction, Request, Response } from "express";
 import { client } from "../services/database/database";
 import { body, validationResult } from 'express-validator';
 import { registerValidation, validateEmail, isActive , loginschema, isCodeactive, generateAccessToken, validatePhonenumber} from "./auth/validation";
@@ -103,8 +103,9 @@ const signIn = async (req: Request, res: Response, next: NextFunction) => {
          const usercheck:boolean | undefined=Boolean(await isActive(email))
         
         const str = usercheck.toString()
+        console.log(str)
         if (str=== "false") {
-            return res.status(200).json({
+            return res.status(422).json({
                 success: false,
                 error: "User account is not active, Kindly activate account"
            })
@@ -122,16 +123,29 @@ const signIn = async (req: Request, res: Response, next: NextFunction) => {
             };
             let result = {
               user: profile,
-              token: token,
+              //token: token,
               expiresIn: 1800,
             };
-            loginWelcomeSender(user);
-            return res.status(200).json({
+            //loginWelcomeSender(user);
+         
+          
+            // console.log(headers)
+           // res.setHeader('Content-Type', 'application/json');
+          
+            res.setHeader('Set-Cookie', token);
+            res.cookie("token", token, {expires:new Date(Date.now() + 1800)})
+              //console.log(req.cookies.token )
+            res.send({
                 ...result,
                 message: "Login success",
                 success: true,
-              });
-            } else {
+             });
+            // Calling response.writeHead method
+            //res.writeHead(200,{'Content-Type': 'application/json'});
+          
+            
+        } else {
+            console.log("i reach here")
               return res.status(403).json({
                 message: "Failed login attempt",
                 email: "Incorrect password",
@@ -180,8 +194,29 @@ const activateAccount= async (req: Request, res: Response, next:NextFunction) =>
     };
 }
 
+const geAllUsers=async (req: Request, res: Response, next:NextFunction) => {
+    try {
+        await client.connect();
+        const allUsers = await Users.find({}).toArray()
+        if (!allUsers) {
+            return res.status(402).json({
+                success: false,
+                error: "No user found"
+            }).statusCode;
+        } else {
+            return res.json({
+                success: true,
+                data: allUsers
+            }).statusCode
+        }
+    } catch (error) {
+        return next(new AppError(`something went wrong here is the error ${error}`, 500));
+    } finally {
+        await client.close();
+    };
+};
 const test = async (req: Request, res: Response) => {
     res.send("ök")
 };
 
-export { signUp,signIn, test, activateAccount };
+export { signUp,signIn, test, activateAccount,geAllUsers };

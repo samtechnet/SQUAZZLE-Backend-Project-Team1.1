@@ -121,11 +121,12 @@ const isActive = async (email: String) => {
         await client.connect()
           let user = await Users.findOne({ email });
           console.log(user.isEmailVerified + "  from isActive")
-          if (user.isEmailVerified === "false") {
+          if (user.isEmailVerified.toString() === "false") {
+              console.log(" i did false")
               return false;
            
           } else {
-              
+            console.log(" i did true")
               return true
           
           }

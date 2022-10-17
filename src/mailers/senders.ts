@@ -105,7 +105,7 @@ const loginWelcomeSender = (user: any) => {
     <p>Welcome to Squazzle, we notice you just login your account at time: ${newDate()}</p> 
     <p>if you didn't initiate this login , pls change your password now. someone may be trying to gain access to your account</p>
     `;
-console.log(user.email)
+//console.log(user.email)
     let mailOptions = {
         from: '"Squazzle Team" <info@creditalert.com.ng>',
         to: `${user.email}`,

@@ -47,19 +47,25 @@ var errors_1 = __importDefault(require("./services/errorHandlers/errors"));
 var database_1 = require("./services/database/database");
 var errrorController_1 = require("./middleware/errrorController");
 var userRoutes_1 = require("./routes/userRoutes");
+var swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
+var documentation_1 = __importDefault(require("./controller/documentation"));
+var cookie_parser_1 = __importDefault(require("cookie-parser"));
 dotenv_1["default"].config();
 var PORT = process.env.PORT || 5000;
 var app = (0, express_1["default"])();
 app.use(body_parser_1["default"].json());
 app.use((0, cors_1["default"])());
 app.use(express_1["default"].json());
+app.use((0, cookie_parser_1["default"])());
+app.use("/documentations", swagger_ui_express_1["default"].serve);
+app.use("/documentations", swagger_ui_express_1["default"].setup(documentation_1["default"]));
 //routes
 (0, userRoutes_1.user_routes)(app);
-app.get("/galleryone", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+app.get("/squazzle", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
-        res.json({
+        res.status(200).json({
             success: true,
-            message: "welcome to gallery-one api, our sweat documentation is on this url endpoint : https://gallery-one-app.herokuapp.com/ ",
+            message: "welcome to squazzle api, our sweat documentation is on this url endpoint : https://gallery-one-app.herokuapp.com/ ",
             note: "should you need any assistance kindly contact our surport on 08161228946"
         });
         return [2 /*return*/];

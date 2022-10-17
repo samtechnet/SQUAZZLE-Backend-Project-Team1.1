@@ -199,10 +199,12 @@ var isActive = function (email) { return __awaiter(void 0, void 0, void 0, funct
             case 2:
                 user = _a.sent();
                 console.log(user.isEmailVerified + "  from isActive");
-                if (user.isEmailVerified === "false") {
+                if (user.isEmailVerified.toString() === "false") {
+                    console.log(" i did false");
                     return [2 /*return*/, false];
                 }
                 else {
+                    console.log(" i did true");
                     return [2 /*return*/, true];
                 }
                 return [3 /*break*/, 4];
