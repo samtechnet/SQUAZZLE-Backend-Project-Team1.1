@@ -174,7 +174,7 @@ const activateAccount= async (req: Request, res: Response, next:NextFunction) =>
                 success: false,
             })
         }else if (user.isEmailVerified) {
-            return res.status(404).json({
+            return res.status(409).json({
               message: "Email already verified",
               success: false,
             });

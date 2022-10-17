@@ -258,7 +258,7 @@ var activateAccount = function (req, res, next) { return __awaiter(void 0, void 
                         })];
                 }
                 else if (user_3.isEmailVerified) {
-                    return [2 /*return*/, res.status(404).json({
+                    return [2 /*return*/, res.status(409).json({
                             message: "Email already verified",
                             success: false
                         })];
